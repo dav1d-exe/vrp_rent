@@ -12,31 +12,29 @@ local heading = 160.06 -- heading-ul masinii (in ce parte sa se spawneze atunci 
 Meniu = false
 Inchiriat = false
 
+local CreateThread = Citizen.CreateThread
+local Wait = Citizen.Wait
+local isPressed = IsDisabledControlJustPressed
+
 --- Incarcarea Iconitelor + blip ---
-Citizen.CreateThread(function()
-
-  addBLIP(rentCoords[1], rentCoords[2], rentCoords[3],"Inchirieri Autovit",76,63) -- adauga blip-ul pe harta
-
+CreateThread(function()
+  createBlip(rentCoords[1], rentCoords[2], rentCoords[3],"Inchirieri Autovit",76,63) -- adauga blip-ul pe harta
   local rentPhoto = CreateRuntimeTxd("rentPhoto")
   CreateRuntimeTextureFromImage(rentPhoto, "rentPhoto", "img/rentPhoto.png")
-
 end)
 --- Incarcarea Iconitelor + blip ---
 
 --- De aici incepe magia :x ---
-Citizen.CreateThread(function()
+CreateThread(function()
      while true do
-      Citizen.Wait(0)
-        local user_id = vRP.getUserId({source})
-        local player = vRP.getUserSource({user_id})
+        Wait(1)
         local ped = PlayerPedId(-1)
         local pedc = GetEntityCoords(ped)
         if(Vdist(GetEntityCoords(GetPlayerPed(-1)),rentCoords[1],rentCoords[2],rentCoords[3]) <= 3.0) then
               DrawMarker(6, rentCoords[1],rentCoords[2],rentCoords[3], 0.5, 0.9, 0.0, 0.0, 180.0, 0.0, 0.5, 0.5, 0.5, 255, 255, 255, 80, false, false, 2, true, nil, false)
               DrawMarker(36, rentCoords[1],rentCoords[2],rentCoords[3], 0.5, 0.9, 0.0, 0.0, 360.0, 0.0, 0.5, 0.5, 0.5, 63, 191, 63, 80, false, false, 2, true, nil, false)
               drawSubtitleText("Apasa ~g~[E] ~w~pentru a deschide ~r~meniul")
-              --DrawText3D(rentCoords[1],rentCoords[2],rentCoords[3]+0.53, "~b~Autovit" ) -- daca vrei sa apara un text deasupra marker-ului, activeaza aceasta linie de cod
-            if IsDisabledControlJustPressed(0, 38) then
+            if isPressed(0, 38) then
                 if not Inchiriat then
                     Meniu = true
                 else
@@ -55,33 +53,27 @@ Citizen.CreateThread(function()
                          DisableControlAction(0,143,true)
                          DisableControlAction(0, 1, true)
                          DisableControlAction(0, 2, true)
-
                          DrawRect(0.5,0.5,0.4,0.4,25,25,25,225) -- meniul main
                          DrawRect(0.5,0.677,0.055,0.025,63,127,191,255) -- butonul "anuleaza"
-
                          --- BORDERS ---
                          DrawRect(0.3,0.500,0.005,0.400,63,127,191,255) -- stanga
                          DrawRect(0.7,0.500,0.005,0.400,63,127,191,255) -- dreapta
                          DrawRect(0.5,0.300,0.405,0.005,63,127,191,255) -- sus
                          DrawRect(0.5,0.700,0.405,0.005,63,127,191,255) -- jos
                          ---------------
-
                          drawCustomScreenText(0.5, 0.66, 0,0, 0.38, "~w~ANULEAZA", 255, 255, 255, 230, 6, 1)
-
                          drawCustomScreenText(0.5, 0.255, 0,0, 0.58, "AUTOVIT", 63, 127, 191, 255, 6, 1)
                          drawCustomScreenText(0.5, 0.30, 0,0, 0.50, "APASA PE MASINA PENTRU A O INCHIRIA\n("..timpRent.." MINUTE)", 255, 255, 255, 230, 6, 1)
                          DrawSprite("rentPhoto","rentPhoto",0.50, 0.45,0.21,0.24,0.0,255,255,255,255)  -- poza masina
-
                          ShowCursorThisFrame()
-
                 if(isCursorInPosition(0.5, 0.68, 0.070, 0.020))then  
                   SetMouseCursorSprite(5)
-                  if IsDisabledControlJustPressed(0, 24) then
+                  if isPressed(0, 24) then
                     Meniu = false
                 end
               elseif(isCursorInPosition(0.50, 0.50, 0.13, 0.20)) then
                     SetMouseCursorSprite(5)
-                    if IsDisabledControlJustPressed(0, 24) then
+                    if isPressed(0, 24) then
                         Meniu = false
                         TriggerServerEvent('InchiriazaMasinaInMM',rentCar)
                     end
@@ -167,7 +159,7 @@ function drawSubtitleText(m_text, showtime)
     DrawSubtitleTimed(showtime, 1)
 end
 
-function addBLIP(x,y,z,name,type,color)
+function createBlip(x,y,z,name,type,color)
     blip = AddBlipForCoord(x, y, z)
     SetBlipSprite(blip, type)
     SetBlipDisplay(blip, 4)
@@ -206,5 +198,3 @@ function DrawText3D(x,y,z, text)
   end
 end
 -----------------------------------------
-
-
